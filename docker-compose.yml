@@ -1,0 +1,44 @@
+version: '3'
+services:
+  jenkins:
+    image: custom-jenkins-with-docker
+    user: root
+    group_add:
+      - 1001 # docker group, change to your docker group id, getent group docker | cut -d: -f3
+    ports:
+      - 9100:8080
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ci-network
+
+  sonarqube:
+    image: sonarqube:latest
+    ports:
+      - 9101:9000
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - ci-network
+
+  nexus:
+    image: sonatype/nexus3
+    ports:
+      - 9102:8081
+    volumes:
+      - nexus_data:/nexus-data
+    networks:
+      - ci-network
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  nexus_data:
+
+networks:
+  ci-network:
